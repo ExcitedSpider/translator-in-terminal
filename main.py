@@ -137,7 +137,6 @@ class Result:
 def translate_word(from_word):
     response = requests.get(dictionary_url_base + from_word)
     if response.status_code == 200:
-        print(response.text)
         resJson = response.json()
         parseWord = lambda word: "\n\n".join(map(meaning_to_string, word['meanings']))
         return Result("\n\n".join(map(parseWord, resJson)))
