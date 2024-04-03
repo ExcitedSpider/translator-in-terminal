@@ -1,0 +1,6 @@
+{
+  "python.formatting.autopep8Args": ["--max-line-length", "60", "--experimental"],
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.autopep8",
+  }
+}
