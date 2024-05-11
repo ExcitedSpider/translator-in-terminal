@@ -11,7 +11,6 @@ from utils import meaning_to_string
 if a string contains non-english characters
 """
 
-
 def contain_foreign(text):
     chinese_pattern = re.compile(r'[\u4e00-\u9fff]+')
     return bool(chinese_pattern.search(text))
@@ -67,9 +66,10 @@ def create_folder_if_not_exsit(folder_path):
     else:
         return True
 
-
-auth_key = read_config_value("config.ini", 'Translator', 'auth_key')
-target_lang = read_config_value("config.ini", 'Translator', 'target_lang')
+script_dir = os.path.dirname(__file__)
+config_file_path = os.path.join(script_dir, "config.ini")
+auth_key = read_config_value(config_file_path, 'Translator', 'auth_key')
+target_lang = read_config_value(config_file_path, 'Translator', 'target_lang')
 
 
 def __main__():
@@ -95,7 +95,7 @@ def __main__():
         cprint("Processing...", color="light_blue")
 
         result = {"text": None}
-        isSentence = any(char.isspace() for char in from_text)
+        isSentence = contain_foreign(from_text) or any(char.isspace() for char in from_text)
 
         if isSentence:
             result = translate_sentences(from_text)
