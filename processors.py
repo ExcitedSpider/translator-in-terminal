@@ -6,8 +6,8 @@ from utils import meaning_to_string, contain_foreign
 dictionary_url_base = 'https://api.dictionaryapi.dev/api/v2/entries/en/'
 
 class Result:
-    def __init__(self, text):
-        self.text = text
+    def __init__(self, text = ""):
+      self.text = text
 
 def translate_word(from_word):
     response = requests.get(dictionary_url_base + from_word)

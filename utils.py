@@ -54,9 +54,6 @@ class TaskCategory(Enum):
     AIAssistant = 3
 
 class Command:
-    def __init__(self) -> None:
-        self.taskCat = TaskCategory.Unknown
-        self.input = ""
     def __init__(self, taskCat: TaskCategory, input: str) -> None:
         self.taskCat = taskCat
         self.input = input
@@ -79,7 +76,7 @@ def parse_input_text(txt: str) -> Command:
     words = txt.split()
     cmdWord = words[0].lower()
     
-    if cmdWord in cmdword_to_task.keys:
+    if cmdWord in cmdword_to_task:
         return Command(cmdword_to_task[cmdWord], " ".join(words[1:]))
     else:
         return Command(TaskCategory.Unknown, txt)
