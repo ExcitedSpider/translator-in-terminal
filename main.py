@@ -1,11 +1,14 @@
-import deepl
-import configparser
 from datetime import datetime
 import os
 from termcolor import cprint
 import re
-import requests
-from utils import meaning_to_string
+from utils import read_config_value, get_input
+from processors import translate_sentences, translate_word
+
+script_dir = os.path.dirname(__file__)
+config_file_path = os.path.join(script_dir, "config.ini")
+auth_key = read_config_value(config_file_path, 'Translator', 'auth_key')
+target_lang = read_config_value(config_file_path, 'Translator', 'target_lang')
 
 """
 if a string contains non-english characters
@@ -29,19 +32,6 @@ Returns:
 """
 
 
-def read_config_value(config_file, section, option):
-    config = configparser.ConfigParser()
-    config.read(config_file)
-
-    if section in config:
-        if option in config[section]:
-            return config[section][option]
-        else:
-            raise KeyError(
-                f"Option '{option}' not found in section '{section}'")
-    else:
-        raise KeyError(
-            f"Section '{section}' not found in the configuration file")
 
 
 def create_folder_if_not_exsit(folder_path):
@@ -66,31 +56,10 @@ def create_folder_if_not_exsit(folder_path):
     else:
         return True
 
-script_dir = os.path.dirname(__file__)
-config_file_path = os.path.join(script_dir, "config.ini")
-auth_key = read_config_value(config_file_path, 'Translator', 'auth_key')
-target_lang = read_config_value(config_file_path, 'Translator', 'target_lang')
-
 
 def __main__():
     while (True):
-        from_text = ""
-        cprint("Please enter your text. Ends with $ or a single new line",
-               color="light_blue")
-        while (True):
-            input_line = input()
-            if input_line == "":
-                break
-            elif input_line.endswith("$"):
-                input_line = input_line.removesuffix('$')
-                from_text += input_line
-                break
-            else:
-                from_text += input_line
-
-        if from_text == "":
-            cprint("Please say something", color="light_red")
-            continue
+        from_text = get_input()
 
         cprint("Processing...", color="light_blue")
 
@@ -98,7 +67,7 @@ def __main__():
         isSentence = contain_foreign(from_text) or any(char.isspace() for char in from_text)
 
         if isSentence:
-            result = translate_sentences(from_text)
+            result = translate_sentences(from_text, auth_key, target_lang)
         else:
             result = translate_word(from_text)
 
@@ -125,44 +94,6 @@ def __main__():
             file.write(from_text)
             file.write('\n\n')
             file.write(result.text)
-
-
-# https://dictionaryapi.dev/
-dictionary_url_base = 'https://api.dictionaryapi.dev/api/v2/entries/en/'
-
-
-class Result:
-    def __init__(self, text):
-        self.text = text
-
-
-def translate_word(from_word):
-    response = requests.get(dictionary_url_base + from_word)
-    if response.status_code == 200:
-        resJson = response.json()
-        def parseWord(word): return "\n\n".join(
-            map(meaning_to_string, word['meanings']))
-        return Result("\n\n".join(map(parseWord, resJson)))
-    elif "message" in response.json():
-        return Result(response.json()['message'])
-    else:
-        return Result("Network Error")
-
-
-def translate_sentences(from_text):
-    from_text = from_text.replace("\r\n", " ")
-    from_text = from_text.replace("\n\r", " ")
-    from_text = from_text.replace("\n", " ")
-
-    translator = deepl.Translator(auth_key)
-
-    if contain_foreign(from_text):
-        result = translator.translate_text(from_text, target_lang="EN-US")
-    else:
-        result = translator.translate_text(
-            from_text, target_lang=target_lang)
-
-    return Result(result.text)
 
 
 __main__()
