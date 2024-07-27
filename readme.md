@@ -2,6 +2,11 @@
 
 A command-line translator powered by [deepl](https://www.deepl.com/translator)
 
+## Roadmap
+
+- [ ] Improve the log as one log file per session
+- [ ] Incorporate ChatGPT
+
 ## Usage
 
 1. Register a deepl account, and get the token
